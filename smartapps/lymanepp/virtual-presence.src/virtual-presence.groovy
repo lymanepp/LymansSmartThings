@@ -55,7 +55,7 @@ def updatePresence() {
 	log.debug "Presence $params.sensor $params.status"
 	virtualPresence.each {
 		if (it.name.equalsIgnoreCase(params.sensor)) {
-			if (params.status.equalsIgnoreCase("home")) {
+			if (params.status.equalsIgnoreCase("present")) {
 				log.debug "Executing arrived for $it.name"
 				it.arrived();
 			} else {
