@@ -5,9 +5,9 @@
 # https://github.com/fuzzysb/SmartThings/blob/master/smartapps/fuzzysb/asuswrt-wifi-presence.src/CheckIfHome
 
 URI="https://graph-na02-useast1.api.smartthings.com"
-CLIENT_ID="YOUR-CLIENT-ID-GOES-HERE"
+APP_ID="YOUR-APP-ID-GOES-HERE"
 TOKEN="YOUR-TOKEN-GOES-HERE"
-STATE=/tmp/Presence
+STATE=/tmp/presence
 
 update_smartthings()
 {
@@ -22,14 +22,14 @@ update_smartthings()
       if [ ! -f $file ]
       then
         touch $file
-        curl -k "${URI}/api/smartapps/installations/${CLIENT_ID}/presence/${user}/present?access_token=${TOKEN}"
+        curl -k "${URI}/api/smartapps/installations/${APP_ID}/presence/${user}/present?access_token=${TOKEN}"
       fi
       ;;
     *)
       if [ -f $file ]
       then
         rm -f $file
-        curl -k "${URI}/api/smartapps/installations/${CLIENT_ID}/presence/${user}/not+present?access_token=${TOKEN}"
+        curl -k "${URI}/api/smartapps/installations/${APP_ID}/presence/${user}/not+present?access_token=${TOKEN}"
       fi
       ;;
   esac

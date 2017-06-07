@@ -34,13 +34,13 @@ preferences {
 def installed() {
 	createAccessToken()
 	getToken()
-	log.debug "Installed Phone with rest api: $app.id"
-	log.debug "Installed Phone with token: $state.accessToken"
+	log.debug "Installed Virtual Presence with app id: $app.id"
+	log.debug "Installed Virtual Presence with token: $state.accessToken"
 }
 
 def updated() {
-	log.debug "Updated Phone with rest api: $app.id"
-	log.debug "Updated Phone with token: $state.accessToken"
+	log.debug "Updated Virtual Presence with app id: $app.id"
+	log.debug "Updated Virtual Presence with token: $state.accessToken"
 }
 
 mappings {
