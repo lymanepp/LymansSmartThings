@@ -27,10 +27,9 @@ definition(
 
 preferences {
 	section(title: "Select Devices") {
-		input "virtualPresence", "capability.presenceSensor", title: "Select Virtual Presence Sensors", required: true, multiple: true
-	}
-	section(title: "Select Group Device (optional)") {
-		input "groupPresence", "capability.presenceSensor", title: "Select Group Virtual Presence Sensor", required: false, multiple: false
+		input "virtualPresence", "capability.presenceSensor", title: "Virtual presence sensors", required: true, multiple: true
+		input "anyPresence", "capability.presenceSensor", title: "Presence sensor if anyone is present (optional)", required: false, multiple: false
+		input "everyPresence", "capability.presenceSensor", title: "Presence sensor if everyone is present (optional)", required: false, multiple: false
 	}
 }
 
@@ -56,6 +55,10 @@ mappings {
 
 def updatePresence() {
 	log.debug "Presence $params.sensor $params.status"
+
+	Boolean anyone = false;
+	Boolean everyone = true;
+
 	virtualPresence.each {
 		if (it.name.equalsIgnoreCase(params.sensor)) {
 			if (params.status.equalsIgnoreCase("present")) {
@@ -66,11 +69,28 @@ def updatePresence() {
 				it.departed();
 			}
 		}
+		
+		if (it.currentValue('presence') == 'present') {
+			anyone = true;
+		} else {
+			everyone = false;
+		}
 	}
-
-	virtualPresence.each {
-		log.debug object.properties.collect{it}.join(', ')
-		//log.debug "Virtual presence %it.name - $it.presence"
+	
+	if (anyPresence) {
+		if (anyone) {
+			anyPresence.arrived();
+		} else {
+			anyPresence.departed();
+		}
+	}
+	
+	if (everyPresence) {
+		if (everyone) {
+			everyPresence.arrived();
+		} else {
+			everyPresence.departed();
+		}
 	}
 }
 
