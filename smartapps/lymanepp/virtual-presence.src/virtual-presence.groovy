@@ -68,11 +68,9 @@ def updatePresence() {
 		}
 	}
 
-	if (groupPresence) {
-		virtualPresence.each {
-			log.debug object.properties.collect{it}.join(', ')
-			//log.debug "Virtual presence %it.name - $it.presence"
-		}
+	virtualPresence.each {
+		log.debug object.properties.collect{it}.join(', ')
+		//log.debug "Virtual presence %it.name - $it.presence"
 	}
 }
 
