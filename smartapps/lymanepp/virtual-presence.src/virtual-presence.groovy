@@ -79,16 +79,20 @@ def updatePresence() {
 	
 	if (anyPresence) {
 		if (anyone) {
+			log.debug "Executing arrived for $anyPresence.name"
 			anyPresence.arrived();
 		} else {
+			log.debug "Executing departed for $anyPresence.name"
 			anyPresence.departed();
 		}
 	}
 	
 	if (everyPresence) {
 		if (everyone) {
+			log.debug "Executing arrived for $everyPresence.name"
 			everyPresence.arrived();
 		} else {
+			log.debug "Executing departed for $everyPresence.name"
 			everyPresence.departed();
 		}
 	}
