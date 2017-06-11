@@ -29,6 +29,9 @@ preferences {
 	section(title: "Select Devices") {
 		input "virtualPresence", "capability.presenceSensor", title: "Select Virtual Presence Sensors", required: true, multiple: true
 	}
+	section(title: "Select Group Device (optional)") {
+		input "groupPresence", "capability.presenceSensor", title: "Select Group Virtual Presence Sensor", required: false, multiple: false
+	}
 }
 
 def installed() {
@@ -63,6 +66,10 @@ def updatePresence() {
 				it.departed();
 			}
 		}
+	}
+
+	virtualPresence.each {
+		log.debug "Virtual presence %it.name - $it.presence"
 	}
 }
 
