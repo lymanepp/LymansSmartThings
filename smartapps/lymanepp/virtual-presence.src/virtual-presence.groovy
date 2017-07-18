@@ -60,7 +60,7 @@ def updatePresence() {
 	Boolean everyone = true;
 
 	virtualPresence.each {
-		if (it.name.equalsIgnoreCase(params.sensor)) {
+		if (params.sensor.equalsIgnoreCase(it.name) && !params.status.equalsIgnoreCase(it.currentValue('presence'))) {
 			if (params.status.equalsIgnoreCase("present")) {
 				log.debug "Executing arrived for $it.name"
 				it.arrived();
@@ -78,22 +78,28 @@ def updatePresence() {
 	}
 	
 	if (anyPresence) {
-		if (anyone) {
-			log.debug "Executing arrived for $anyPresence.name"
-			anyPresence.arrived();
-		} else {
-			log.debug "Executing departed for $anyPresence.name"
-			anyPresence.departed();
+		Boolean currentValue = anyPresence.currentValue('presence').equalsIgnoreCase("present");
+		if (anyone != currentValue) {
+			if (anyone) {
+				log.debug "Executing arrived for $anyPresence.name"
+				anyPresence.arrived();
+			} else {
+				log.debug "Executing departed for $anyPresence.name"
+				anyPresence.departed();
+			}
 		}
 	}
 	
 	if (everyPresence) {
-		if (everyone) {
-			log.debug "Executing arrived for $everyPresence.name"
-			everyPresence.arrived();
-		} else {
-			log.debug "Executing departed for $everyPresence.name"
-			everyPresence.departed();
+		Boolean currentValue = everyPresence.currentValue('presence').equalsIgnoreCase("present");
+		if (everyone != currentValue) {
+			if (everyone) {
+				log.debug "Executing arrived for $everyPresence.name"
+				everyPresence.arrived();
+			} else {
+				log.debug "Executing departed for $everyPresence.name"
+				everyPresence.departed();
+			}
 		}
 	}
 }
