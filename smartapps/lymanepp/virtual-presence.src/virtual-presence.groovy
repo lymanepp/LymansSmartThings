@@ -34,6 +34,7 @@ preferences {
 }
 
 def installed() {
+	init()
 	createAccessToken()
 	getToken()
 	log.debug "Installed Virtual Presence with app id: $app.id"
@@ -41,8 +42,14 @@ def installed() {
 }
 
 def updated() {
+	unsubscribe()
+	init()
 	log.debug "Updated Virtual Presence with app id: $app.id"
 	log.debug "Updated Virtual Presence with token: $state.accessToken"
+}
+
+def init() {
+    state.departed = []
 }
 
 mappings {
@@ -56,52 +63,62 @@ mappings {
 def updatePresence() {
 	log.debug "Presence $params.sensor $params.status"
 
-	Boolean anyone = false;
-	Boolean everyone = true;
-
-	virtualPresence.each {
-		if (params.sensor.equalsIgnoreCase(it.name) && !params.status.equalsIgnoreCase(it.currentValue('presence'))) {
-			if (params.status.equalsIgnoreCase("present")) {
-				log.debug "Executing arrived for $it.name"
-				it.arrived();
-			} else {
-				log.debug "Executing departed for $it.name"
-				it.departed();
-			}
-		}
-		
-		if (it.currentValue('presence') == 'present') {
-			anyone = true;
-		} else {
-			everyone = false;
-		}
+	def sensor = virtualPresence.find { params.sensor.equalsIgnoreCase(it.name) }
+    if (sensor) {
+        setPresence(sensor, params.status.equalsIgnoreCase("present"));
 	}
-	
+    
 	if (anyPresence) {
-		Boolean currentValue = anyPresence.currentValue('presence').equalsIgnoreCase("present");
-		if (anyone != currentValue) {
-			if (anyone) {
-				log.debug "Executing arrived for $anyPresence.name"
-				anyPresence.arrived();
-			} else {
-				log.debug "Executing departed for $anyPresence.name"
-				anyPresence.departed();
-			}
-		}
+        Boolean present = virtualPresence.any { it.currentValue("presence").equalsIgnoreCase("present") }
+		setPresence(anyPresence, present);
 	}
 	
 	if (everyPresence) {
-		Boolean currentValue = everyPresence.currentValue('presence').equalsIgnoreCase("present");
-		if (everyone != currentValue) {
-			if (everyone) {
-				log.debug "Executing arrived for $everyPresence.name"
-				everyPresence.arrived();
-			} else {
-				log.debug "Executing departed for $everyPresence.name"
-				everyPresence.departed();
-			}
-		}
+        Boolean present = virtualPresence.every { it.currentValue("presence").equalsIgnoreCase("present") }
+		setPresence(everyPresence, present);
 	}
+}
+
+def setPresence(sensor, present) {
+    if (present) {
+        if (state.departed.remove(sensor.name) && state.departed.size() == 0) {
+        	unschedule(departedHandler)
+        }
+        
+        if (!sensor.currentValue("presence").equalsIgnoreCase("present")) {
+	        log.debug "Executing arrived for $sensor.name"
+        	sensor.arrived()
+        }
+    } else {
+        log.debug "Scheduling departed for $sensor.name"
+        state.departed.add(sensor.name)
+        runIn(600, departedHandler)
+    }
+}
+
+def departedHandler() {
+	state.departed.each {
+    	def sensor = getPresenceSensor(it)
+	    if (sensor.currentValue("presence").equalsIgnoreCase("present")) {
+            log.debug "Executing departed for $sensor.name"
+            sensor.departed()
+        }
+    }
+    state.departed = []
+}
+
+def getPresenceSensor(name) {
+	def sensor = virtualPresence.find { it.name == name }
+    if (sensor)
+        return sensor
+    
+	if (anyPresence && anyPresence.name == name)
+    	return anyPresence
+	
+	if (everyPresence && everyPresence.name == name)
+    	return everyPresence
+    
+    return null
 }
 
 def getToken() {
